@@ -37,65 +37,108 @@ const handleResend = async (id: number): Promise<void> => {
       <p class="text-sm">No referrals yet. Invite someone to get started.</p>
     </div>
 
-    <!-- Table -->
-    <div v-else class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="text-gray-tertiary text-left border-b border-dark-border">
-            <th class="pb-3 font-medium pr-6">Name</th>
-            <th class="pb-3 font-medium pr-6">Email</th>
-            <th class="pb-3 font-medium pr-6">Status</th>
-            <th class="pb-3 font-medium pr-6">Invited Date</th>
-            <th class="pb-3 font-medium"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="referral in store.referrals"
-            :key="referral.id"
-            class="border-b border-dark-border last:border-0"
-          >
-            <td class="py-4 pr-6 font-semibold text-gray-primary">
+    <template v-else>
+      <!-- Mobile cards -->
+      <div class="block md:hidden">
+        <div
+          v-for="referral in store.referrals"
+          :key="referral.id"
+          class="py-4 border-b border-dark-border last:border-0"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <span class="font-semibold text-gray-primary text-sm">
               {{ referral.first_name }} {{ referral.last_name }}
-            </td>
-            <td class="py-4 pr-6 text-gray-secondary">{{ referral.email }}</td>
-            <td class="py-4 pr-6">
-              <StatusPill :status="referral.status" />
-            </td>
-            <td class="py-4 pr-6 text-gray-secondary">
-              <span class="inline-flex items-center gap-1.5">
-                <!-- calendar icon -->
-                <svg class="w-3.5 h-3.5 text-gray-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            </span>
+            <StatusPill :status="referral.status" />
+          </div>
+
+          <div class="flex items-end justify-between mt-2">
+            <div class="space-y-1">
+              <p class="text-sm text-gray-secondary">{{ referral.email }}</p>
+              <p class="text-xs text-gray-tertiary inline-flex items-center gap-1.5">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
                 </svg>
                 {{ formatDate(referral.created_at) }}
-              </span>
-            </td>
-            <td class="py-4 text-right">
-              <button
-                v-if="referral.status === 'invitation_sent'"
-                @click="handleResend(referral.id)"
-                class="inline-flex items-center gap-1.5 text-gray-secondary hover:text-gray-primary transition-colors text-sm"
-                :disabled="store.loadingResend === referral.id"
-              >
-                {{ store.loadingResend === referral.id ? 'Sending...' : 'Re-send' }}
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                </svg>
-              </button>
-              <span v-else class="text-gray-tertiary text-sm">N/A</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <Paginator
-      v-if="store.totalPages > 1"
-      :currentPage="store.currentPage"
-      :totalPages="store.totalPages"
-      @prev="store.getReferrals(store.currentPage - 1)"
-      @next="store.getReferrals(store.currentPage + 1)"
-    />
+              </p>
+            </div>
+
+            <button
+              v-if="referral.status === 'invitation_sent'"
+              @click="handleResend(referral.id)"
+              :disabled="store.loadingResend === referral.id"
+              class="inline-flex items-center gap-1.5 text-gray-secondary hover:text-gray-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            >
+              {{ store.loadingResend === referral.id ? 'Sending...' : 'Re-send' }}
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </button>
+            <span v-else class="text-gray-tertiary text-sm">N/A</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop table -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-gray-tertiary text-left border-b border-dark-border">
+              <th class="pb-3 font-medium pr-6">Name</th>
+              <th class="pb-3 font-medium pr-6">Email</th>
+              <th class="pb-3 font-medium pr-6">Status</th>
+              <th class="pb-3 font-medium pr-6">Invited Date</th>
+              <th class="pb-3 font-medium"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="referral in store.referrals"
+              :key="referral.id"
+              class="border-b border-dark-border last:border-0"
+            >
+              <td class="py-4 pr-6 font-semibold text-gray-primary">
+                {{ referral.first_name }} {{ referral.last_name }}
+              </td>
+              <td class="py-4 pr-6 text-gray-secondary">{{ referral.email }}</td>
+              <td class="py-4 pr-6">
+                <StatusPill :status="referral.status" />
+              </td>
+              <td class="py-4 pr-6 text-gray-secondary">
+                <span class="inline-flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-gray-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                  </svg>
+                  {{ formatDate(referral.created_at) }}
+                </span>
+              </td>
+              <td class="py-4 text-right">
+                <button
+                  v-if="referral.status === 'invitation_sent'"
+                  @click="handleResend(referral.id)"
+                  :disabled="store.loadingResend === referral.id"
+                  class="inline-flex items-center gap-1.5 text-gray-secondary hover:text-gray-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                >
+                  {{ store.loadingResend === referral.id ? 'Sending...' : 'Re-send' }}
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                </button>
+                <span v-else class="text-gray-tertiary text-sm">N/A</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <Paginator
+        :currentPage="store.currentPage"
+        :totalPages="store.totalPages"
+        @prev="store.getReferrals(store.currentPage - 1)"
+        @next="store.getReferrals(store.currentPage + 1)"
+      />
+    </template>
+
     <Toast
       v-if="store.resendError && !store.loadingResend"
       :message="store.resendError"
