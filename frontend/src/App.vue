@@ -1,23 +1,23 @@
 <script setup lang="ts">
-// Import your components here
+import InviteForm from './components/InviteForm.vue'
+import ReferralTable from './components/ReferralTable.vue'
+import InfoSection from './components/InfoSection.vue'
 </script>
 
 <template>
   <div class="min-h-screen bg-dark-bg">
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl font-serif text-gray-primary mb-8">
-        Member Referral Dashboard
-      </h1>
+    <div class="container mx-auto px-4 py-10 max-w-5xl">
+      <h1 class="text-4xl font-serif text-gray-primary mb-2">Invite a Member</h1>
+      <p class="text-gray-secondary mb-8">
+        Help grow our community by referring qualified investors. We expect all members to uphold our
+        <a href="#" class="underline text-gray-primary">Code of Standards</a>.
+      </p>
 
-      <!-- TODO: Add your components here -->
-      <div class="text-gray-secondary">
-        <p>Build your referral dashboard components here.</p>
-        <p class="mt-2">See REQUIREMENTS.md for feature specifications.</p>
+      <div class="space-y-6">
+        <InviteForm />
+        <ReferralTable />
+        <InfoSection />
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any component-specific styles here */
-</style>
