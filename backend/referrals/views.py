@@ -1,7 +1,7 @@
 import time
 from django.utils import timezone
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.serializers import BaseSerializer
@@ -71,3 +71,22 @@ class ReferralViewSet(viewsets.ModelViewSet):
             return Response({"detail": "This token has already been used."}, status=status.HTTP_410_GONE)
 
         return Response(ReferralTokenLookupSerializer(referral).data, status=status.HTTP_200_OK)
+
+
+# using api_view instead of creating another viewset for only 1 endpoint
+@api_view(['GET'])
+def analytics(request: Request) -> Response:
+    total: int = Referral.objects.count()
+    invitations_sent: int = Referral.objects.filter(status=Referral.Status.INVITATION_SENT).count()
+    joined: int = Referral.objects.filter(status=Referral.Status.JOINED).count()
+    if total > 0:
+        conversion_rate = round((joined / total * 100), 2)
+    else:
+        conversion_rate = 0.0
+
+    return Response({
+        "total_invited": total,
+        "invitations_sent": invitations_sent,
+        "joined": joined,
+        "conversion_rate": conversion_rate,
+    })
