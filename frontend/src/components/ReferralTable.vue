@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useReferralStore } from '../stores/referral'
 import { formatDate } from '../utils/date'
 import StatusPill from './StatusPill.vue'
+import Toast from './Toast.vue'
 
 const store = useReferralStore()
 
@@ -87,11 +88,10 @@ const handleResend = async (id: number): Promise<void> => {
         </tbody>
       </table>
     </div>
-    <p
-        v-if="store.resendError && !store.loadingResend"
-        class="mt-4 text-sm text-red-400"
-      >
-        {{ store.resendError }}
-      </p>
+    <Toast
+      v-if="store.resendError && !store.loadingResend"
+      :message="store.resendError"
+      @close="store.resendError = null"
+    />
   </div>
 </template>
