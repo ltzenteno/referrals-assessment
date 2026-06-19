@@ -1,18 +1,12 @@
-import time
-from django.utils import timezone
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.serializers import BaseSerializer
 
 from referrals.models import Referral
 from referrals.serializers import ReferralCreateSerializer, ReferralSerializer, ReferralTokenLookupSerializer
-
-
-#
-# Suggested approach:
-# - Use Django REST Framework ViewSets
+from referrals.services import ReferralService
 
 
 class ReferralViewSet(viewsets.ModelViewSet):
@@ -22,10 +16,9 @@ class ReferralViewSet(viewsets.ModelViewSet):
     def create(self, request: Request) -> Response:
         write_serializer = ReferralCreateSerializer(data=request.data)
         write_serializer.is_valid(raise_exception=True)
-        referral = write_serializer.save()
-        response_serializer = ReferralSerializer(referral)
+        referral = ReferralService.create_referral(**write_serializer.validated_data)
 
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(ReferralSerializer(referral).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
     def resend(self, request: Request, pk: int | None = None) -> Response:
@@ -34,21 +27,10 @@ class ReferralViewSet(viewsets.ModelViewSet):
         """
         referral: Referral = self.get_object()
 
-        if referral.status != Referral.Status.INVITATION_SENT:
-            return Response(
-                {"detail": "Can only resend invitations with status 'Invitation Sent'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        seconds_since_last: float = (timezone.now() - referral.last_sent_at).total_seconds()
-        if seconds_since_last < 30:
-            return Response(
-                {"detail": "Cannot resend within 30 seconds."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        time.sleep(0.5) # simulate email sending delay
-        referral.rotate_token()
+        try:
+            referral = ReferralService.resend_invitation(referral)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(ReferralSerializer(referral).data, status=status.HTTP_200_OK)
 
@@ -63,30 +45,19 @@ class ReferralViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            referral = Referral.objects.get(token=token)
+            referral = ReferralService.lookup_by_token(token)
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Referral.DoesNotExist:
             return Response({"detail": "Invalid or Expired token."}, status=status.HTTP_404_NOT_FOUND)
-
-        if referral.status != Referral.Status.INVITATION_SENT:
+        except PermissionError:
             return Response({"detail": "This token has already been used."}, status=status.HTTP_410_GONE)
 
         return Response(ReferralTokenLookupSerializer(referral).data, status=status.HTTP_200_OK)
 
 
+
 # using api_view instead of creating another viewset for only 1 endpoint
 @api_view(['GET'])
 def analytics(request: Request) -> Response:
-    total: int = Referral.objects.count()
-    invitations_sent: int = Referral.objects.filter(status=Referral.Status.INVITATION_SENT).count()
-    joined: int = Referral.objects.filter(status=Referral.Status.JOINED).count()
-    if total > 0:
-        conversion_rate = round((joined / total * 100), 2)
-    else:
-        conversion_rate = 0.0
-
-    return Response({
-        "total_invited": total,
-        "invitations_sent": invitations_sent,
-        "joined": joined,
-        "conversion_rate": conversion_rate,
-    })
+    return Response(ReferralService.get_analytics())

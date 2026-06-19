@@ -14,18 +14,6 @@ class ReferralCreateSerializer(serializers.ModelSerializer[Referral]):
         model = Referral
         fields = ["first_name", "last_name", "email"]
 
-    def validate_email(self, value: str) -> str:
-        normalized_email = value.strip().lower()
-
-        if Referral.objects.filter(email=normalized_email).exists():
-            raise EmailAlreadyExistsError()
-
-        return normalized_email
-
-    def create(self, validated_data: dict) -> Referral:
-        validated_data["last_sent_at"] = timezone.now()
-        return super().create(validated_data)
-
 
 class ReferralSerializer(serializers.ModelSerializer[Referral]):
     class Meta:

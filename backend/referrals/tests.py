@@ -118,3 +118,9 @@ class TokenTest(TestCase):
     def test_unknown_token_returns_404(self) -> None:
         response = self.client.get(f'/api/referrals/lookup/?token={uuid.uuid4()}')
         self.assertEqual(response.status_code, 404)
+
+    def test_invalid_token_returns_400(self) -> None:
+        r = make_referral()
+        r.save()
+        response = self.client.get('/api/referrals/lookup/?token=invalid-token')
+        self.assertEqual(response.status_code, 400)
