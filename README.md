@@ -66,6 +66,9 @@ docker compose exec backend python manage.py migrate
 
 # Verify backend is running (Django welcome page until you wire up routes)
 curl http://localhost:8000/
+
+# create super user
+docker compose exec backend python manage.py createsuperuser
 ```
 
 The backend will be available at `http://localhost:8000`
