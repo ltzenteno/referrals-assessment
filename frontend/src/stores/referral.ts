@@ -8,6 +8,7 @@ export const useReferralStore = defineStore('referral', () => {
   const referrals = ref<Referral[]>([])
   const analytics = ref<ReferralAnalytics | null>(null)
   const error = ref<string | null>(null)
+  const resendError = ref<string | null>(null)
 
   const loadingFetch = ref(false)
   const loadingCreate = ref(false)
@@ -53,7 +54,7 @@ export const useReferralStore = defineStore('referral', () => {
 
   const resendReferral = async (id: number): Promise<void> => {
     loadingResend.value = id
-    error.value = null
+    resendError.value = null
 
     try {
       const updated = await resendReferralApi(id)
@@ -63,7 +64,7 @@ export const useReferralStore = defineStore('referral', () => {
         referrals.value[index] = updated
       }
     } catch (err) {
-      error.value = extractError(err)
+      resendError.value = extractError(err)
     } finally {
       loadingResend.value = null
     }
@@ -86,6 +87,7 @@ export const useReferralStore = defineStore('referral', () => {
     referrals,
     analytics,
     error,
+    resendError,
     loadingFetch,
     loadingCreate,
     loadingResend,

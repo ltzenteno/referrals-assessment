@@ -9,6 +9,10 @@ const store = useReferralStore()
 onMounted(() => {
   store.getReferrals()
 })
+
+const handleResend = async (id: number): Promise<void> => {
+  await store.resendReferral(id)
+}
 </script>
 
 <template>
@@ -68,9 +72,11 @@ onMounted(() => {
             <td class="py-4 text-right">
               <button
                 v-if="referral.status === 'invitation_sent'"
+                @click="handleResend(referral.id)"
                 class="inline-flex items-center gap-1.5 text-gray-secondary hover:text-gray-primary transition-colors text-sm"
+                :disabled="store.loadingResend === referral.id"
               >
-                Re-send
+                {{ store.loadingResend === referral.id ? 'Sending...' : 'Re-send' }}
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                 </svg>
@@ -81,5 +87,11 @@ onMounted(() => {
         </tbody>
       </table>
     </div>
+    <p
+        v-if="store.resendError && !store.loadingResend"
+        class="mt-4 text-sm text-red-400"
+      >
+        {{ store.resendError }}
+      </p>
   </div>
 </template>
