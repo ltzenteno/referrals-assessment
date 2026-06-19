@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { CreateReferralRequest, Referral, ReferralAnalytics } from '../types'
+import type { CreateReferralRequest, Referral, ReferralAnalytics } from '../types'
 import axios from 'axios'
 import { createReferral, fetchAnalytics, fetchReferrals, resendReferral as resendReferralApi } from '../api'
 

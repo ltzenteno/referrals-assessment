@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { useReferralStore } from '../stores/referral'
+import { formatDate } from '../utils/date'
 import StatusPill from './StatusPill.vue'
 
-const referrals = [
-  { id: 1, name: 'Sarah Johnson',    email: 'sarah@example.com',   status: 'joined',                date: 'Nov 15, 2024', joinedOn: 'Dec 2, 2024' },
-  { id: 2, name: 'Michael Chen',     email: 'michael@example.com', status: 'application_received',  date: 'Dec 1, 2024',  joinedOn: null },
-  { id: 3, name: 'Jessica Rodriguez',email: 'jessica@example.com', status: 'invitation_sent',       date: 'Dec 8, 2024',  joinedOn: null },
-  { id: 4, name: 'David Kim',        email: 'david@example.com',   status: 'joined',                date: 'Oct 22, 2024', joinedOn: 'Nov 10, 2024' },
-]
+const store = useReferralStore()
+
+onMounted(() => {
+  store.getReferrals()
+})
 </script>
 
 <template>
@@ -14,8 +16,18 @@ const referrals = [
     <h2 class="text-xl font-serif text-gray-primary mb-1">Your Member Referrals</h2>
     <p class="text-sm text-gray-secondary mb-6">Track the status of your referrals and see when they join.</p>
 
+    <!-- Loading state -->
+    <div v-if="store.loadingFetch" class="text-center py-12 text-gray-tertiary">
+      <p class="text-sm">Loading referrals...</p>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="store.error" class="text-center py-12 text-red-400">
+      <p class="text-sm">{{ store.error }}</p>
+    </div>
+
     <!-- Empty state -->
-    <div v-if="referrals.length === 0" class="text-center py-12 text-gray-tertiary">
+    <div v-else-if="store.referrals.length === 0" class="text-center py-12 text-gray-tertiary">
       <p class="text-sm">No referrals yet. Invite someone to get started.</p>
     </div>
 
@@ -33,14 +45,16 @@ const referrals = [
         </thead>
         <tbody>
           <tr
-            v-for="referral in referrals"
+            v-for="referral in store.referrals"
             :key="referral.id"
             class="border-b border-dark-border last:border-0"
           >
-            <td class="py-4 pr-6 font-semibold text-gray-primary">{{ referral.name }}</td>
+            <td class="py-4 pr-6 font-semibold text-gray-primary">
+              {{ referral.first_name }} {{ referral.last_name }}
+            </td>
             <td class="py-4 pr-6 text-gray-secondary">{{ referral.email }}</td>
             <td class="py-4 pr-6">
-              <StatusPill :status="referral.status as any" :date="referral.joinedOn ?? undefined" />
+              <StatusPill :status="referral.status" />
             </td>
             <td class="py-4 pr-6 text-gray-secondary">
               <span class="inline-flex items-center gap-1.5">
@@ -48,7 +62,7 @@ const referrals = [
                 <svg class="w-3.5 h-3.5 text-gray-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
                 </svg>
-                {{ referral.date }}
+                {{ formatDate(referral.created_at) }}
               </span>
             </td>
             <td class="py-4 text-right">
