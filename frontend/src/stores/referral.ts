@@ -7,8 +7,10 @@ import { createReferral, fetchAnalytics, fetchReferrals, resendReferral as resen
 export const useReferralStore = defineStore('referral', () => {
   const referrals = ref<Referral[]>([])
   const analytics = ref<ReferralAnalytics | null>(null)
-  const error = ref<string | null>(null)
+  const listError = ref<string | null>(null)
+  const formError = ref<string | null>(null)
   const resendError = ref<string | null>(null)
+  const analyticsError = ref<string | null>(null)
 
   const loadingFetch = ref(false)
   const loadingCreate = ref(false)
@@ -25,12 +27,12 @@ export const useReferralStore = defineStore('referral', () => {
 
   const getReferrals = async (): Promise<void> => {
     loadingFetch.value = true
-    error.value = null
+    listError.value = null
 
     try {
       referrals.value = await fetchReferrals() // TODO: send page number
     } catch (err) {
-      error.value = extractError(err)
+      listError.value = extractError(err)
     } finally {
       loadingFetch.value = false
     }
@@ -38,14 +40,14 @@ export const useReferralStore = defineStore('referral', () => {
 
   const addReferral = async (payload: CreateReferralRequest): Promise<boolean>  => {
     loadingCreate.value = true
-    error.value = null
+    formError.value = null
 
     try {
       const referral = await createReferral(payload)
       referrals.value.unshift(referral)
       return true
     } catch (err) {
-      error.value = extractError(err)
+      formError.value = extractError(err)
       return false
     } finally {
       loadingCreate.value = false
@@ -72,12 +74,12 @@ export const useReferralStore = defineStore('referral', () => {
 
   const getAnalytics = async (): Promise<void> => {
     loadingAnalytics.value = true
-    error.value = null
+    analyticsError.value = null
 
     try {
       analytics.value = await fetchAnalytics()
     } catch (err) {
-      error.value = extractError(err)
+      analyticsError.value = extractError(err)
     } finally {
       loadingAnalytics.value = false
     }
@@ -86,7 +88,9 @@ export const useReferralStore = defineStore('referral', () => {
   return {
     referrals,
     analytics,
-    error,
+    listError,
+    formError,
+    analyticsError,
     resendError,
     loadingFetch,
     loadingCreate,

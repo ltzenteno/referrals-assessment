@@ -27,8 +27,8 @@ const handleResend = async (id: number): Promise<void> => {
     </div>
 
     <!-- Error state -->
-    <div v-else-if="store.error" class="text-center py-12 text-red-400">
-      <p class="text-sm">{{ store.error }}</p>
+    <div v-else-if="store.listError" class="text-center py-12 text-red-400">
+      <p class="text-sm">{{ store.listError }}</p>
     </div>
 
     <!-- Empty state -->

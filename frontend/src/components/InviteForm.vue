@@ -39,7 +39,7 @@ const handleSubmit = async (): Promise<void> => {
     email.value = ''
     fieldError.value = null
   } else {
-    fieldError.value = store.error || 'An error occurred while sending the invitation.'
+    fieldError.value = store.formError || 'An error occurred while sending the invitation.'
   }
 }
 
