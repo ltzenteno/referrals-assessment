@@ -1,12 +1,12 @@
 import axios from 'axios'
-import type { Referral, CreateReferralRequest, ReferralAnalytics } from './../types'
+import type { Referral, CreateReferralRequest, ReferralAnalytics, PaginatedResponse } from './../types'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 })
 
-export const fetchReferrals = async (): Promise<Referral[]> =>
-  api.get('/referrals/').then((response) => response.data.results)
+export const fetchReferrals = async (page: number = 1): Promise<PaginatedResponse<Referral>> =>
+  api.get('/referrals/', { params: { page } }).then((response) => response.data)
 
 export const createReferral = async (payload: CreateReferralRequest): Promise<Referral> =>
   api.post('/referrals/', payload).then((response) => response.data)

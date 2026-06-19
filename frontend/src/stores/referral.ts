@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { CreateReferralRequest, Referral, ReferralAnalytics } from '../types'
 import axios from 'axios'
 import { createReferral, fetchAnalytics, fetchReferrals, resendReferral as resendReferralApi } from '../api'
@@ -17,6 +17,10 @@ export const useReferralStore = defineStore('referral', () => {
   const loadingResend = ref<number | null>(null)
   const loadingAnalytics = ref(false)
 
+  const currentPage = ref(1)
+  const totalCount = ref(0)
+
+
   const extractError = (err: unknown): string => {
     if (axios.isAxiosError(err)) {
       return err.response?.data?.detail ?? 'An unexpected error occurred.'
@@ -25,12 +29,18 @@ export const useReferralStore = defineStore('referral', () => {
     return 'An unexpected error occurred.'
   }
 
-  const getReferrals = async (): Promise<void> => {
+  // keeping the page size hardcoded for simplicity (consistent with Django PAGE_SIZE)
+  const totalPages = computed(() => Math.ceil(totalCount.value / 50))
+
+  const getReferrals = async (page: number = 1): Promise<void> => {
     loadingFetch.value = true
     listError.value = null
 
     try {
-      referrals.value = await fetchReferrals() // TODO: send page number
+      const response = await fetchReferrals(page)
+      referrals.value = response.results
+      totalCount.value = response.count
+      currentPage.value = page
     } catch (err) {
       listError.value = extractError(err)
     } finally {
@@ -100,5 +110,7 @@ export const useReferralStore = defineStore('referral', () => {
     addReferral,
     resendReferral,
     getAnalytics,
+    currentPage,
+    totalPages,
   }
 })

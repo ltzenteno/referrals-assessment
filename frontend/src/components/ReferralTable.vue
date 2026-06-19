@@ -4,6 +4,7 @@ import { useReferralStore } from '../stores/referral'
 import { formatDate } from '../utils/date'
 import StatusPill from './StatusPill.vue'
 import Toast from './Toast.vue'
+import Paginator from './Paginator.vue'
 
 const store = useReferralStore()
 
@@ -88,6 +89,13 @@ const handleResend = async (id: number): Promise<void> => {
         </tbody>
       </table>
     </div>
+    <Paginator
+      v-if="store.totalPages > 1"
+      :currentPage="store.currentPage"
+      :totalPages="store.totalPages"
+      @prev="store.getReferrals(store.currentPage - 1)"
+      @next="store.getReferrals(store.currentPage + 1)"
+    />
     <Toast
       v-if="store.resendError && !store.loadingResend"
       :message="store.resendError"
