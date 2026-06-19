@@ -83,3 +83,38 @@ class ResendCooldownTest(TestCase):
         r.save()
         response = self.client.post(f'/api/referrals/{r.id}/resend/')
         self.assertEqual(response.status_code, 400)
+
+
+class TokenTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+    def test_token_generated_on_creation(self) -> None:
+        r = make_referral()
+        self.assertIsNotNone(r.token)
+
+    def test_resend_rotates_token(self) -> None:
+        r = make_referral(last_sent_at=timezone.now() - timedelta(seconds=31))
+        old_token = r.token
+        self.client.post(f'/api/referrals/{r.id}/resend/')
+        r.refresh_from_db()
+        self.assertNotEqual(r.token, old_token)
+
+    def test_old_token_returns_404_after_rotation(self) -> None:
+        r = make_referral(last_sent_at=timezone.now() - timedelta(seconds=31))
+        old_token = r.token
+        self.client.post(f'/api/referrals/{r.id}/resend/')
+        response = self.client.get(f'/api/referrals/lookup/?token={old_token}')
+        self.assertEqual(response.status_code, 404)
+
+    def test_token_stops_working_after_status_advances(self) -> None:
+        r = make_referral()
+        token = r.token
+        r.status = Referral.Status.JOINED
+        r.save()
+        response = self.client.get(f'/api/referrals/lookup/?token={token}')
+        self.assertEqual(response.status_code, 410)
+
+    def test_unknown_token_returns_404(self) -> None:
+        response = self.client.get(f'/api/referrals/lookup/?token={uuid.uuid4()}')
+        self.assertEqual(response.status_code, 404)

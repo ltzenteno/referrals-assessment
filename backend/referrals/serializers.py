@@ -31,3 +31,9 @@ class ReferralSerializer(serializers.ModelSerializer[Referral]):
     class Meta:
         model = Referral
         fields = ["id", "first_name", "last_name", "email", "status", "created_at", "last_sent_at"]
+
+
+class ReferralTokenLookupSerializer(serializers.ModelSerializer[Referral]):
+    class Meta:
+        model = Referral
+        fields = ["id", "first_name", "last_name", "email", "status"]
