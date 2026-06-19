@@ -10,7 +10,7 @@ from referrals.services import ReferralService
 
 
 class ReferralViewSet(viewsets.ModelViewSet):
-    queryset = Referral.objects.all()
+    queryset = Referral.objects.all().order_by('-created_at')
     serializer_class = ReferralSerializer
 
     def create(self, request: Request) -> Response:
