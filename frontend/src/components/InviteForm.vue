@@ -8,9 +8,13 @@ const name = ref('')
 const email = ref('')
 const fieldError = ref<string | null>(null)
 
+const isValidEmail = (value: string): boolean =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+
 const isSubmitEnabled = computed(() =>
   name.value.trim().length > 0 &&
-  email.value.trim().length > 0 &&
+  isValidEmail(email.value) &&
+
   !store.loadingCreate
 )
 
