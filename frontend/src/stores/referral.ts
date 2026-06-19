@@ -30,7 +30,7 @@ export const useReferralStore = defineStore('referral', () => {
   }
 
   // keeping the page size hardcoded for simplicity (consistent with Django PAGE_SIZE)
-  const totalPages = computed(() => Math.ceil(totalCount.value / 50))
+  const totalPages = computed(() => Math.ceil(totalCount.value / 10))
 
   const getReferrals = async (page: number = 1): Promise<void> => {
     loadingFetch.value = true
