@@ -20,10 +20,8 @@ class Referral(models.Model):
     last_sent_at = models.DateTimeField()
 
     def save(self, *args, **kwargs) -> None:
-        # even though the FE will send the email trimmed
-        # I am enforcing it here, also converting to lowercase before saving
         self.email = self.email.strip().lower()
-        self.last_sent_at = timezone.now()
+
         super().save(*args, **kwargs)
 
     def rotate_token(self) -> None:

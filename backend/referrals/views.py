@@ -1,3 +1,5 @@
+import time
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -22,3 +24,25 @@ class ReferralViewSet(viewsets.ModelViewSet):
         response_serializer = ReferralSerializer(referral)
 
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def resend(self, request: Request, pk: int | None = None) -> Response:
+        referral: Referral = self.get_object()
+
+        if referral.status != Referral.Status.INVITATION_SENT:
+            return Response(
+                {"detail": "Can only resend invitations with status 'Invitation Sent'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        seconds_since_last: float = (timezone.now() - referral.last_sent_at).total_seconds()
+        if seconds_since_last < 30:
+            return Response(
+                {"detail": "Cannot resend within 30 seconds."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        time.sleep(0.5)
+        referral.rotate_token()
+
+        return Response(ReferralSerializer(referral).data, status=status.HTTP_200_OK)

@@ -1,6 +1,8 @@
+import uuid
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
+from datetime import timedelta
 from rest_framework.test import APIClient
 from .models import Referral
 
@@ -51,3 +53,33 @@ class EmailUniquenessTest(TestCase):
         })
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Referral.objects.first().email, 'test@example.com')
+
+
+class ResendCooldownTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+    def test_resend_rejected_within_30_seconds(self) -> None:
+        r = make_referral(last_sent_at=timezone.now())
+        response = self.client.post(f'/api/referrals/{r.id}/resend/')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('30 seconds', response.data['detail'])
+
+    def test_resend_allowed_after_30_seconds(self) -> None:
+        r = make_referral(last_sent_at=timezone.now() - timedelta(seconds=31))
+        response = self.client.post(f'/api/referrals/{r.id}/resend/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_resend_updates_last_sent_at(self) -> None:
+        old_time = timezone.now() - timedelta(seconds=31)
+        r = make_referral(last_sent_at=old_time)
+        self.client.post(f'/api/referrals/{r.id}/resend/')
+        r.refresh_from_db()
+        self.assertGreater(r.last_sent_at, old_time)
+
+    def test_resend_non_invitation_sent_status_returns_400(self) -> None:
+        r = make_referral(last_sent_at=timezone.now() - timedelta(seconds=31))
+        r.status = Referral.Status.JOINED
+        r.save()
+        response = self.client.post(f'/api/referrals/{r.id}/resend/')
+        self.assertEqual(response.status_code, 400)

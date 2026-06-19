@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 
 from referrals.exceptions import EmailAlreadyExistsError
 from referrals.models import Referral
@@ -20,6 +21,10 @@ class ReferralCreateSerializer(serializers.ModelSerializer[Referral]):
             raise EmailAlreadyExistsError()
 
         return normalized_email
+
+    def create(self, validated_data: dict) -> Referral:
+        validated_data["last_sent_at"] = timezone.now()
+        return super().create(validated_data)
 
 
 class ReferralSerializer(serializers.ModelSerializer[Referral]):
