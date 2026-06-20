@@ -1,23 +1,35 @@
 <script setup lang="ts">
-import InviteForm from './components/InviteForm.vue'
-import ReferralTable from './components/ReferralTable.vue'
-import InfoSection from './components/InfoSection.vue'
+import { RouterView, RouterLink } from 'vue-router'
 </script>
 
 <template>
   <div class="min-h-screen bg-dark-bg">
-    <div class="container mx-auto px-4 py-10 max-w-5xl">
-      <h1 class="text-4xl font-serif text-gray-primary mb-2">Invite a Member</h1>
-      <p class="text-gray-secondary mb-8">
-        Help grow our community by referring qualified investors. We expect all members to uphold our
-        <a href="#" class="underline text-gray-primary">Code of Standards</a>.
-      </p>
-
-      <div class="space-y-6">
-        <InviteForm />
-        <ReferralTable />
-        <InfoSection />
+    <!-- Nav -->
+    <nav class="border-b border-dark-border">
+      <div class="container mx-auto px-4 max-w-5xl h-14 flex items-center justify-between">
+        <span class="font-serif text-gray-primary text-lg">10 East</span>
+        <div class="flex items-center gap-6 text-sm">
+          <RouterLink
+            to="/"
+            class="text-gray-secondary hover:text-gray-primary transition-colors"
+            active-class="text-gray-primary font-medium"
+          >
+            Referrals
+          </RouterLink>
+          <RouterLink
+            to="/analytics"
+            class="text-gray-secondary hover:text-gray-primary transition-colors"
+            active-class="text-gray-primary font-medium"
+          >
+            Analytics
+          </RouterLink>
+        </div>
       </div>
+    </nav>
+
+    <!-- Page content -->
+    <div class="container mx-auto px-4 py-10 max-w-5xl">
+      <RouterView />
     </div>
   </div>
 </template>
