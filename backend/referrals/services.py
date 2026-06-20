@@ -33,6 +33,8 @@ class ReferralService:
 
         return referral
 
+    # For assessment scope, tokens do not have a time-based expiry. They are single-purpose:
+    # a token stops working once the referral status advances past 'invitation_sent'.
     @staticmethod
     def lookup_by_token(token: str) -> Referral:
         try:
