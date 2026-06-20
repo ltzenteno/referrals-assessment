@@ -3,6 +3,7 @@ import { watch, onUnmounted } from 'vue'
 
 const props = defineProps<{
   message: string | null
+  type?: 'error' | 'success'
 }>()
 
 const emit = defineEmits<{
@@ -39,14 +40,21 @@ onUnmounted(() => {
   >
     <div
       v-if="message"
-      class="fixed top-6 right-6 z-50 flex items-start gap-3 bg-dark-card border border-red-800 rounded-xl px-4 py-3 shadow-lg max-w-sm"
+      :class="type === 'success'
+        ? 'border-green-800'
+        : 'border-red-800'"
+      class="fixed top-6 right-6 z-50 flex items-start gap-3 bg-dark-card border rounded-xl px-4 py-3 shadow-lg max-w-sm"
     >
+      <!-- success icon -->
+      <svg v-if="type === 'success'" class="w-4 h-4 text-success shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+      </svg>
       <!-- error icon -->
-      <svg class="w-4 h-4 text-red-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg v-else class="w-4 h-4 text-red-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
       </svg>
 
-      <p class="text-sm text-red-400 flex-1">{{ message }}</p>
+      <p :class="type === 'success' ? 'text-success' : 'text-red-400'" class="text-sm flex-1">{{ message }}</p>
 
       <!-- close button -->
       <button

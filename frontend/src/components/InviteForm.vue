@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useReferralStore } from '../stores/referral'
+import Toast from './Toast.vue'
 
 const store = useReferralStore()
 
 const name = ref('')
 const email = ref('')
 const fieldError = ref<string | null>(null)
+const successMessage = ref<string | null>(null)
 
 const isValidEmail = (value: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
@@ -42,6 +44,7 @@ const handleSubmit = async (): Promise<void> => {
     name.value = ''
     email.value = ''
     fieldError.value = null
+    successMessage.value = 'Invitation sent successfully!'
   } else {
     fieldError.value = store.formError || 'An error occurred while sending the invitation.'
   }
@@ -106,4 +109,6 @@ const handleSubmit = async (): Promise<void> => {
       </div>
     </form>
   </div>
+
+  <Toast :message="successMessage" type="success" @close="successMessage = null" />
 </template>
