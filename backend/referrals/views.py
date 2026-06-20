@@ -55,6 +55,9 @@ class ReferralViewSet(viewsets.ModelViewSet):
 
         return Response(ReferralTokenLookupSerializer(referral).data, status=status.HTTP_200_OK)
 
+    # NOTE: for the update (PUT / PATCH) it is going through the ReferralSerializer directly, I am leaving it like this
+    # since the requirements don't specify any business rules around updating
+
 
 
 # using api_view instead of creating another viewset for only 1 endpoint
