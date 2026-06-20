@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import type { ReferralStatus } from '../types';
+
 defineProps<{
-  status: 'invitation_sent' | 'application_received' | 'joined' | 'declined'
+  status: ReferralStatus
   date?: string
 }>()
 
-const config = {
+const config: Record<ReferralStatus, { label: string; classes: string; icon: string }> = {
   invitation_sent: {
     label: 'Invitation Sent',
     classes: 'bg-gray-700 text-gray-300',
