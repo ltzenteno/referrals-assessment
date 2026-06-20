@@ -50,4 +50,18 @@ def resend_invitation(request, pk):
 
 > List issues, most severe first. Then fix the top one.
 
-1. …
+1. line 40: using `random` isn't secure, it should be generated preferably UUID.
+2. it is reading the `last_sent_at` from the payload that user sent, not from the referral object in the DB, if it is kept that way user can send whichever value, affecting the logic.
+3. method is missing a status check, the logic should only rotate the token if the referral status is `INVITATION_SENT`
+4. line 44: it should not send the token in the response.
+5. line 31: it is not handling a possible `DoesNotExist` exception.
+6. line 35: it is using datetime instead of timezone.
+
+
+> fix for top one:
+
+```python
+import uuid
+...
+referral.token = uuid.uuid4()
+```
